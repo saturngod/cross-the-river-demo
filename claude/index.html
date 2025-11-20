@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monks & Devils - River Crossing Puzzle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .rules {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .rules h3 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .rules p {
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .game-board {
+            position: relative;
+            background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 100%);
+            border-radius: 15px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            min-height: 400px;
+        }
+
+        .river {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 100%;
+            background: linear-gradient(to right,
+                    transparent 0%,
+                    rgba(30, 144, 255, 0.3) 20%,
+                    rgba(30, 144, 255, 0.5) 50%,
+                    rgba(30, 144, 255, 0.3) 80%,
+                    transparent 100%);
+            animation: wave 3s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .banks {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bank {
+            background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+            border-radius: 15px;
+            padding: 20px;
+            width: 280px;
+            min-height: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bank h2 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .characters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .character {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .character:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .character.selected {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+        }
+
+        .boat-container {
+            position: absolute;
+            top: 50%;
+            left: 20%;
+            transform: translate(-50%, -50%);
+            transition: left 1s ease-in-out;
+            z-index: 10;
+        }
+
+        .boat-container.right {
+            left: 80%;
+        }
+
+        .boat {
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            border: 3px solid #654321;
+            border-radius: 50px;
+            padding: 15px 25px;
+            min-width: 150px;
+            min-height: 100px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .boat::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            right: 10%;
+            height: 5px;
+            background: rgba(139, 69, 19, 0.5);
+            border-radius: 50%;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .status.win {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .status.lose {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #17a2b8;
+        }
+
+        .moves-counter {
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        svg {
+            width: 60px;
+            height: 60px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>🙏 Monks & Devils 😈</h1>
+
+        <div class="rules">
+            <h3>📜 Rules:</h3>
+            <p>
+                <strong>Goal:</strong> Move all 3 monks and 3 devils to the right bank.<br>
+                <strong>Boat:</strong> Can carry 1-2 characters per trip.<br>
+                <strong>Safety Rule:</strong> Devils must NEVER outnumber monks on either bank (unless no monks are
+                present).<br>
+                <strong>How to Play:</strong> Click characters to select them, then click "Cross River" to move the
+                boat.
+            </p>
+        </div>
+
+        <div class="game-board">
+            <div class="river"></div>
+
+            <div class="banks">
+                <div class="bank" id="left-bank">
+                    <h2>🌅 Left Bank</h2>
+                    <div class="characters" id="left-characters"></div>
+                </div>
+
+                <div class="bank" id="right-bank">
+                    <h2>🌄 Right Bank</h2>
+                    <div class="characters" id="right-characters"></div>
+                </div>
+            </div>
+
+            <div class="boat-container" id="boat-container">
+                <div class="boat" id="boat"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="cross-btn">🚣 Cross River</button>
+            <button id="reset-btn">🔄 Reset Game</button>
+        </div>
+
+        <div class="moves-counter">Moves: <span id="moves">0</span></div>
+        <div class="status info" id="status">Select 1-2 characters and click "Cross River"</div>
+    </div>
+
+    <script>
+        // SVG Templates
+        const monkSVG = `
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="35" r="20" fill="#FFE4B5"/>
+                <circle cx="50" cy="25" r="15" fill="#8B4513"/>
+                <rect x="35" y="50" width="30" height="35" rx="5" fill="#FF8C00"/>
+                <circle cx="45" cy="30" r="3" fill="#000"/>
+                <circle cx="55" cy="30" r="3" fill="#000"/>
+                <path d="M 45 38 Q 50 40 55 38" stroke="#000" stroke-width="2" fill="none"/>
+                <rect x="30" y="55" width="10" height="25" fill="#FF8C00"/>
+                <rect x="60" y="55" width="10" height="25" fill="#FF8C00"/>
+            </svg>
+        `;
+
+        const devilSVG = `
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="40" r="22" fill="#DC143C"/>
+                <polygon points="35,25 38,15 42,25" fill="#8B0000"/>
+                <polygon points="65,25 62,15 58,25" fill="#8B0000"/>
+                <rect x="35" y="55" width="30" height="35" rx="5" fill="#8B0000"/>
+                <circle cx="43" cy="38" r="4" fill="#FFD700"/>
+                <circle cx="57" cy="38" r="4" fill="#FFD700"/>
+                <path d="M 42 48 Q 50 52 58 48" stroke="#000" stroke-width="2" fill="none"/>
+                <polygon points="48,85 50,95 52,85" fill="#8B0000"/>
+                <rect x="30" y="60" width="10" height="25" fill="#8B0000"/>
+                <rect x="60" y="60" width="10" height="25" fill="#8B0000"/>
+            </svg>
+        `;
+
+        // Game State
+        let gameState = {
+            leftBank: { monks: 3, devils: 3 },
+            rightBank: { monks: 0, devils: 0 },
+            boat: { monks: 0, devils: 0 },
+            boatOnLeft: true,
+            selected: [],
+            moves: 0,
+            gameOver: false
+        };
+
+        // Initialize game
+        function initGame() {
+            gameState = {
+                leftBank: { monks: 3, devils: 3 },
+                rightBank: { monks: 0, devils: 0 },
+                boat: { monks: 0, devils: 0 },
+                boatOnLeft: true,
+                selected: [],
+                moves: 0,
+                gameOver: false
+            };
+            updateDisplay();
+            document.getElementById('status').className = 'status info';
+            document.getElementById('status').textContent = 'Select 1-2 characters and click "Cross River"';
+        }
+
+        // Create character element
+        function createCharacter(type, id) {
+            const div = document.createElement('div');
+            div.className = 'character';
+            div.dataset.type = type;
+            div.dataset.id = id;
+            div.innerHTML = type === 'monk' ? monkSVG : devilSVG;
+            div.onclick = () => selectCharacter(div);
+            return div;
+        }
+
+        // Update display
+        function updateDisplay() {
+            const leftChars = document.getElementById('left-characters');
+            const rightChars = document.getElementById('right-characters');
+            const boat = document.getElementById('boat');
+            const boatContainer = document.getElementById('boat-container');
+
+            leftChars.innerHTML = '';
+            rightChars.innerHTML = '';
+            boat.innerHTML = '';
+
+            // Left bank
+            for (let i = 0; i < gameState.leftBank.monks; i++) {
+                leftChars.appendChild(createCharacter('monk', `left-monk-${i}`));
+            }
+            for (let i = 0; i < gameState.leftBank.devils; i++) {
+                leftChars.appendChild(createCharacter('devil', `left-devil-${i}`));
+            }
+
+            // Right bank
+            for (let i = 0; i < gameState.rightBank.monks; i++) {
+                rightChars.appendChild(createCharacter('monk', `right-monk-${i}`));
+            }
+            for (let i = 0; i < gameState.rightBank.devils; i++) {
+                rightChars.appendChild(createCharacter('devil', `right-devil-${i}`));
+            }
+
+            // Boat
+            for (let i = 0; i < gameState.boat.monks; i++) {
+                const char = createCharacter('monk', `boat-monk-${i}`);
+                char.style.pointerEvents = 'none';
+                boat.appendChild(char);
+            }
+            for (let i = 0; i < gameState.boat.devils; i++) {
+                const char = createCharacter('devil', `boat-devil-${i}`);
+                char.style.pointerEvents = 'none';
+                boat.appendChild(char);
+            }
+
+            // Boat position
+            boatContainer.className = gameState.boatOnLeft ? 'boat-container' : 'boat-container right';
+
+            // Moves counter
+            document.getElementById('moves').textContent = gameState.moves;
+
+            // Disable characters on opposite bank
+            if (gameState.boatOnLeft) {
+                rightChars.style.opacity = '0.5';
+                rightChars.style.pointerEvents = 'none';
+                leftChars.style.opacity = '1';
+                leftChars.style.pointerEvents = 'auto';
+            } else {
+                leftChars.style.opacity = '0.5';
+                leftChars.style.pointerEvents = 'none';
+                rightChars.style.opacity = '1';
+                rightChars.style.pointerEvents = 'auto';
+            }
+        }
+
+        // Select character
+        function selectCharacter(element) {
+            if (gameState.gameOver) return;
+
+            const type = element.dataset.type;
+            const totalInBoat = gameState.boat.monks + gameState.boat.devils;
+
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                gameState.boat[type + 's']--;
+                gameState.selected = gameState.selected.filter(s => s !== element.dataset.id);
+            } else {
+                if (totalInBoat < 2) {
+                    element.classList.add('selected');
+                    gameState.boat[type + 's']++;
+                    gameState.selected.push(element.dataset.id);
+                }
+            }
+
+            updateDisplay();
+        }
+
+        // Check if state is valid
+        function isValidState(monks, devils) {
+            if (monks === 0) return true;
+            return devils <= monks;
+        }
+
+        // Cross river
+        function crossRiver() {
+            if (gameState.gameOver) return;
+
+            const totalInBoat = gameState.boat.monks + gameState.boat.devils;
+            if (totalInBoat === 0 || totalInBoat > 2) {
+                showStatus('Select 1-2 characters to cross!', 'info');
+                return;
+            }
+
+            // Move characters
+            if (gameState.boatOnLeft) {
+                gameState.leftBank.monks -= gameState.boat.monks;
+                gameState.leftBank.devils -= gameState.boat.devils;
+                gameState.rightBank.monks += gameState.boat.monks;
+                gameState.rightBank.devils += gameState.boat.devils;
+            } else {
+                gameState.rightBank.monks -= gameState.boat.monks;
+                gameState.rightBank.devils -= gameState.boat.devils;
+                gameState.leftBank.monks += gameState.boat.monks;
+                gameState.leftBank.devils += gameState.boat.devils;
+            }
+
+            gameState.boatOnLeft = !gameState.boatOnLeft;
+            gameState.boat = { monks: 0, devils: 0 };
+            gameState.selected = [];
+            gameState.moves++;
+
+            updateDisplay();
+
+            // Check game state
+            setTimeout(() => {
+                if (!isValidState(gameState.leftBank.monks, gameState.leftBank.devils) ||
+                    !isValidState(gameState.rightBank.monks, gameState.rightBank.devils)) {
+                    gameState.gameOver = true;
+                    showStatus('💀 Game Over! Devils overpowered the monks!', 'lose');
+                    return;
+                }
+
+                if (gameState.rightBank.monks === 3 && gameState.rightBank.devils === 3) {
+                    gameState.gameOver = true;
+                    showStatus(`🎉 Victory! You won in ${gameState.moves} moves!`, 'win');
+                    return;
+                }
+
+                showStatus('Select 1-2 characters and click "Cross River"', 'info');
+            }, 1000);
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // Event listeners
+        document.getElementById('cross-btn').addEventListener('click', crossRiver);
+        document.getElementById('reset-btn').addEventListener('click', initGame);
+
+        // Start game
+        initGame();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>River Crossing: Monks & Devils</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Background is handled via CSS -->
+        
+        <div id="ui-layer">
+            <h1>River Crossing</h1>
+            <div id="message-box" class="hidden"></div>
+            <button id="reset-btn">Reset Game</button>
+        </div>
+
+        <div id="game-area">
+            <div id="left-bank" class="bank">
+                <!-- Characters will be injected here by JS -->
+            </div>
+            
+            <div id="river">
+                <div id="boat-container" class="left-side">
+                    <div id="boat">
+                        <!-- Boat seats -->
+                        <div class="seat" data-seat="0"></div>
+                        <div class="seat" data-seat="1"></div>
+                    </div>
+                    <button id="move-btn">GO</button>
+                </div>
+            </div>
+            
+            <div id="right-bank" class="bank">
+                <!-- Characters will be injected here by JS -->
+            </div>
+        </div>
+
+        <div id="modal-overlay" class="hidden">
+            <div id="modal-content">
+                <h2 id="modal-title">Game Over</h2>
+                <p id="modal-message">The devils overpowered the monks!</p>
+                <button id="modal-restart-btn">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

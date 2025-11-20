@@ -1,0 +1,22 @@
+<svg width="60" height="100" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <path d="M20 35 L 40 35 L 45 90 L 15 90 Z" fill="#E53935" />
+  
+  <!-- Head -->
+  <circle cx="30" cy="25" r="12" fill="#E53935" />
+  
+  <!-- Horns -->
+  <path d="M22 16 L 18 5 L 26 14 Z" fill="#3E2723" />
+  <path d="M38 16 L 42 5 L 34 14 Z" fill="#3E2723" />
+  
+  <!-- Eyes -->
+  <path d="M24 22 L 28 24 L 24 26 Z" fill="#FFEB3B" />
+  <path d="M36 22 L 32 24 L 36 26 Z" fill="#FFEB3B" />
+  
+  <!-- Grin -->
+  <path d="M25 30 Q 30 35, 35 30" fill="none" stroke="#3E2723" stroke-width="1.5" />
+  
+  <!-- Tail -->
+  <path d="M45 80 Q 55 70, 50 60 Q 45 50, 55 45 L 58 42 L 52 42 Z" fill="none" stroke="#E53935" stroke-width="2" />
+  <path d="M55 45 L 60 40 L 50 40 Z" fill="#E53935" />
+</svg>

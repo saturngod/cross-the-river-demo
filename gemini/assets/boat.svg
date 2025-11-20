@@ -1,0 +1,16 @@
+<svg width="120" height="60" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="woodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8D6E63;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6D4C41;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8D6E63;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Hull -->
+  <path d="M10 40 Q 60 60, 110 40 L 100 20 L 20 20 Z" fill="url(#woodGradient)" stroke="#3E2723" stroke-width="2"/>
+  
+  <!-- Seats -->
+  <rect x="35" y="25" width="10" height="5" fill="#4E342E" />
+  <rect x="75" y="25" width="10" height="5" fill="#4E342E" />
+</svg>

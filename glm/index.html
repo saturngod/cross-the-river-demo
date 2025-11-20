@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>River Crossing Puzzle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1><Û River Crossing Puzzle <Û</h1>
+
+        <div class="game-info">
+            <div class="rules">
+                <h3>Rules:</h3>
+                <p>=£ Move all monks and devils across the river</p>
+                <p>  Devils must never outnumber monks on any bank</p>
+                <p>=e Boat can carry up to 2 passengers</p>
+            </div>
+            <div class="game-status">
+                <p id="status-text">Move all characters to the right bank to win!</p>
+                <button id="reset-btn">= Reset Game</button>
+            </div>
+        </div>
+
+        <div class="game-board">
+            <!-- Left Bank -->
+            <div class="bank left-bank">
+                <h3>Left Bank</h3>
+                <div class="bank-area" id="left-bank">
+                    <div class="characters" id="left-monks"></div>
+                    <div class="characters" id="left-devils"></div>
+                </div>
+            </div>
+
+            <!-- River and Boat -->
+            <div class="river">
+                <div class="boat" id="boat">
+                    <div class="boat-passengers" id="boat-passengers"></div>
+                </div>
+                <div class="boat-controls">
+                    <button id="move-boat" disabled>=£B Cross River</button>
+                </div>
+            </div>
+
+            <!-- Right Bank -->
+            <div class="bank right-bank">
+                <h3>Right Bank <¯</h3>
+                <div class="bank-area" id="right-bank">
+                    <div class="characters" id="right-monks"></div>
+                    <div class="characters" id="right-devils"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="counts">
+            <div class="count-display">
+                <span>Left Bank: </span>
+                <span id="left-count">=|3 =3</span>
+            </div>
+            <div class="count-display">
+                <span>Boat: </span>
+                <span id="boat-count">=|0 =0</span>
+            </div>
+            <div class="count-display">
+                <span>Right Bank: </span>
+                <span id="right-count">=|0 =0</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

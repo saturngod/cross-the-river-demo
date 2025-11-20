@@ -1,0 +1,36 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0F7FA;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0288D1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grassGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#81C784;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#388E3C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Sky -->
+  <rect width="800" height="250" fill="url(#skyGradient)" />
+  
+  <!-- Mountains -->
+  <path d="M0 250 L150 100 L300 250 Z" fill="#90A4AE" opacity="0.8"/>
+  <path d="M200 250 L400 50 L600 250 Z" fill="#78909C" opacity="0.9"/>
+  <path d="M500 250 L650 120 L800 250 Z" fill="#90A4AE" opacity="0.8"/>
+
+  <!-- River -->
+  <rect y="250" width="800" height="150" fill="url(#waterGradient)" />
+  
+  <!-- Left Bank -->
+  <path d="M0 250 Q 150 260, 250 400 L 0 400 Z" fill="url(#grassGradient)" />
+  
+  <!-- Right Bank -->
+  <path d="M800 250 Q 650 260, 550 400 L 800 400 Z" fill="url(#grassGradient)" />
+  
+  <!-- Sun -->
+  <circle cx="700" cy="60" r="40" fill="#FFEB3B" opacity="0.9" />
+</svg>

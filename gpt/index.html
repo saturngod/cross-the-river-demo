@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monks and Devils River Crossing</title>
+  <style>
+    :root {
+      --ink: #eaf2ff;
+      --muted: #b7c6e6;
+      --bg: #0b1426;
+      --panel: #0f213d;
+      --panel-2: #132a4d;
+      --accent: #7cf0ff;
+      --accent-2: #ffc857;
+      --accent-3: #52e2b9;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
+      --river: linear-gradient(180deg, #0e8ad8 0%, #0a64b7 60%, #084a92 100%);
+      --monk: #ffcd7a;
+      --devil: #ff6b6b;
+      --boat: #f59e0b;
+      --font: "Avenir Next", "Futura", "Segoe UI", "Helvetica Neue", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      background: radial-gradient(120% 80% at 15% 12%, #1e3357 0%, #0b1426 42%, #071022 100%);
+      color: var(--ink);
+      display: flex;
+      justify-content: center;
+      padding: 32px 18px 48px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .bg-illustration {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.55;
+    }
+
+    .game-shell {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    header.top {
+      background: linear-gradient(120deg, rgba(16, 40, 73, 0.9), rgba(19, 48, 85, 0.85));
+      border: 1px solid rgba(124, 240, 255, 0.2);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      font-size: 12px;
+      margin: 0 0 6px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 34px);
+      letter-spacing: 0.02em;
+    }
+
+    .lead {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 820px;
+    }
+
+    .status-bar {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .message {
+      flex: 1 1 260px;
+      padding: 12px 14px;
+      background: rgba(7, 23, 45, 0.75);
+      border: 1px solid rgba(124, 240, 255, 0.2);
+      border-radius: 14px;
+      color: var(--ink);
+      font-weight: 600;
+      line-height: 1.4;
+      min-height: 28px;
+    }
+
+    .message.win {
+      border-color: rgba(82, 226, 185, 0.7);
+      color: #b5ffe1;
+    }
+
+    .message.lose {
+      border-color: rgba(255, 107, 107, 0.6);
+      color: #ffc8c8;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+      font-family: var(--font);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .ghost-btn {
+      background: rgba(124, 240, 255, 0.12);
+      color: var(--ink);
+      border: 1px solid rgba(124, 240, 255, 0.35);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .ghost-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+      border-color: rgba(124, 240, 255, 0.6);
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip strong {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .play-area {
+      position: relative;
+      background: linear-gradient(120deg, rgba(24, 46, 76, 0.7), rgba(18, 38, 64, 0.9));
+      border: 1px solid rgba(124, 240, 255, 0.2);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .banks {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      align-items: end;
+      min-height: 420px;
+    }
+
+    .bank {
+      position: relative;
+      padding: 16px;
+      background: rgba(11, 24, 44, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bank.left {
+      background: linear-gradient(180deg, rgba(45, 104, 79, 0.55), rgba(11, 24, 44, 0.9));
+    }
+
+    .bank.right {
+      background: linear-gradient(180deg, rgba(121, 78, 150, 0.4), rgba(11, 24, 44, 0.9));
+    }
+
+    .bank h3 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .count-row {
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .figure-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      min-height: 220px;
+    }
+
+    .river {
+      position: relative;
+      border: 1px dashed rgba(124, 240, 255, 0.25);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(11, 39, 76, 0.8);
+      overflow: hidden;
+      min-height: 360px;
+    }
+
+    .water {
+      position: absolute;
+      inset: 14px;
+      border-radius: 12px;
+      background: var(--river);
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .water::before,
+    .water::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 30%, rgba(255, 255, 255, 0.12), transparent 35%),
+        radial-gradient(ellipse at 80% 60%, rgba(255, 255, 255, 0.12), transparent 35%),
+        radial-gradient(ellipse at 50% 70%, rgba(255, 255, 255, 0.08), transparent 40%);
+      animation: drift 18s linear infinite;
+      opacity: 0.6;
+    }
+
+    .water::after {
+      animation-duration: 24s;
+      animation-direction: reverse;
+      opacity: 0.4;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translateX(-12px);
+      }
+      to {
+        transform: translateX(12px);
+      }
+    }
+
+    .boat {
+      position: absolute;
+      bottom: 24px;
+      left: var(--boat-x, 8%);
+      width: 210px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 3;
+      transition: left 0.5s ease;
+    }
+
+    .boat[data-side="right"] {
+      --boat-x: calc(100% - 210px - 8%);
+    }
+
+    .boat-graphic {
+      width: 100%;
+      filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35));
+    }
+
+    .boat-figures {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      align-items: flex-end;
+      min-height: 120px;
+      width: 100%;
+      padding: 6px;
+    }
+
+    .boat-actions {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .sail-btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: linear-gradient(120deg, #ffd166, #f59e0b);
+      color: #1a1a1a;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .sail-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .token {
+      background: transparent;
+      padding: 0;
+      border-radius: 12px;
+      border: 1px solid transparent;
+    }
+
+    .token svg {
+      width: 70px;
+      height: 90px;
+      display: block;
+    }
+
+    .token:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: rgba(124, 240, 255, 0.4);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .token.disabled {
+      opacity: 0.35;
+      border-color: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .token-label {
+      font-size: 12px;
+      text-align: center;
+      margin-top: -4px;
+      color: var(--muted);
+    }
+
+    .warning {
+      color: #ffc8c8;
+    }
+
+    .win {
+      color: #aef8d8;
+    }
+
+    .rules {
+      background: rgba(11, 24, 44, 0.8);
+      border: 1px solid rgba(124, 240, 255, 0.2);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .rules h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: 0.03em;
+      color: var(--accent);
+    }
+
+    .rules ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .bank.unsafe {
+      border-color: rgba(255, 107, 107, 0.7);
+      box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+    }
+
+    @media (max-width: 960px) {
+      .banks {
+        grid-template-columns: 1fr;
+      }
+
+      .river {
+        min-height: 300px;
+      }
+
+      .boat {
+        position: relative;
+        margin: 0 auto;
+        left: 0;
+      }
+
+      .boat[data-side="right"] {
+        --boat-x: 0;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 18px 14px 38px;
+      }
+
+      .token svg {
+        width: 60px;
+        height: 78px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-illustration">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+      <defs>
+        <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#173057" />
+          <stop offset="60%" stop-color="#0c1b34" />
+          <stop offset="100%" stop-color="#070f20" />
+        </linearGradient>
+        <linearGradient id="hill" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#14334f" />
+          <stop offset="100%" stop-color="#0e253f" />
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="800" fill="url(#sky)" />
+      <circle cx="180" cy="140" r="90" fill="#ffe29f" opacity="0.45" />
+      <circle cx="180" cy="140" r="140" fill="#ffc857" opacity="0.18" />
+      <path d="M0 520 Q160 440 340 520 T720 520 T1200 520 V800 H0 Z" fill="url(#hill)" opacity="0.75" />
+      <path d="M0 540 Q220 450 460 540 T920 540 T1200 540 V800 H0 Z" fill="#0d1c33" opacity="0.7" />
+      <g opacity="0.35" fill="#7cf0ff">
+        <circle cx="940" cy="140" r="6" />
+        <circle cx="860" cy="210" r="4" />
+        <circle cx="1040" cy="190" r="5" />
+        <circle cx="990" cy="260" r="7" />
+        <circle cx="1120" cy="230" r="6" />
+        <circle cx="760" cy="170" r="5" />
+      </g>
+    </svg>
+  </div>
+
+  <main class="game-shell">
+    <header class="top">
+      <div class="eyebrow">River logic puzzle</div>
+      <h1>Monks and Devils Crossing</h1>
+      <p class="lead">
+        Move every monk and every devil to the right bank without ever letting devils outnumber monks on a bank.
+        Anyone can row, but the boat only fits two passengers.
+      </p>
+      <div class="status-bar">
+        <div class="message" id="statusMessage">Load passengers from the docked bank, then sail across.</div>
+        <div class="controls">
+          <button class="ghost-btn" id="resetBtn" type="button">Reset puzzle</button>
+        </div>
+      </div>
+      <div class="chip-row">
+        <div class="chip">Boat side: <strong id="boatSideLabel">Left bank</strong></div>
+        <div class="chip">Capacity: <strong>2 passengers</strong></div>
+        <div class="chip">Safety: <strong>devils cannot outnumber monks</strong></div>
+      </div>
+    </header>
+
+    <section class="play-area">
+      <div class="banks">
+        <div class="bank left" data-side="left">
+          <h3>Left bank</h3>
+          <div class="count-row" id="leftCount">3 monks, 3 devils</div>
+          <div class="figure-row" id="leftFigures"></div>
+        </div>
+
+        <div class="river">
+          <div class="water"></div>
+          <div class="boat" id="boat" data-side="left">
+            <div class="boat-graphic" aria-hidden="true">
+              <svg viewBox="0 0 240 120">
+                <defs>
+                  <linearGradient id="boatWood" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#d97706" />
+                    <stop offset="60%" stop-color="#b45309" />
+                    <stop offset="100%" stop-color="#9a3412" />
+                  </linearGradient>
+                </defs>
+                <path d="M18 46 H222 Q214 86 188 104 Q170 116 120 116 Q70 116 52 104 Q26 86 18 46 Z" fill="url(#boatWood)" stroke="#5b3410" stroke-width="4" />
+                <path d="M34 46 H206" stroke="#f1c27d" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+                <circle cx="70" cy="38" r="4" fill="#ffe29f" />
+                <circle cx="120" cy="36" r="4" fill="#ffe29f" />
+                <circle cx="170" cy="38" r="4" fill="#ffe29f" />
+              </svg>
+            </div>
+            <div class="boat-figures" id="boatFigures"></div>
+            <div class="boat-actions">
+              <button class="sail-btn" id="sailBtn" type="button">Sail to other bank</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bank right" data-side="right">
+          <h3>Right bank</h3>
+          <div class="count-row" id="rightCount">0 monks, 0 devils</div>
+          <div class="figure-row" id="rightFigures"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rules">
+      <h2>Rules and tips</h2>
+      <ul>
+        <li>Anyone can operate the boat, but it holds at most two passengers.</li>
+        <li>The safety rule must hold everywhere: if monks are present, devils cannot outnumber them.</li>
+        <li>You lose immediately if a bank ever has more devils than monks.</li>
+        <li>You win when all monks and devils stand safely on the right bank.</li>
+        <li>Tap a character on the docked bank to load it, tap a passenger on the boat to unload.</li>
+      </ul>
+    </section>
+  </main>
+
+  <svg class="sprite-sheet" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="monkRobe" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f5b641" />
+        <stop offset="100%" stop-color="#e5962f" />
+      </linearGradient>
+      <linearGradient id="devilSkin" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ff4d4f" />
+        <stop offset="100%" stop-color="#d9383e" />
+      </linearGradient>
+
+      <symbol id="icon-monk" viewBox="0 0 80 100">
+        <circle cx="40" cy="24" r="14" fill="#ffe4b3" stroke="#f4c67c" stroke-width="2" />
+        <path d="M35 12 Q40 10 45 12 Q42 16 35 16 Z" fill="#c47a2c" />
+        <rect x="24" y="38" width="32" height="44" rx="10" fill="url(#monkRobe)" stroke="#c47a2c" stroke-width="2" />
+        <path d="M24 58 Q40 70 56 58" stroke="#f8e1b8" stroke-width="3" fill="none" stroke-linecap="round" />
+        <path d="M32 34 Q40 42 48 34" stroke="#d68b2c" stroke-width="3" fill="none" stroke-linecap="round" />
+        <circle cx="36" cy="24" r="2.4" fill="#1f2937" />
+        <circle cx="44" cy="24" r="2.4" fill="#1f2937" />
+        <path d="M36 30 Q40 32 44 30" stroke="#1f2937" stroke-width="2" fill="none" stroke-linecap="round" />
+        <path d="M40 82 Q28 88 24 96 H56 Q52 88 40 82 Z" fill="#854d0e" opacity="0.9" />
+      </symbol>
+
+      <symbol id="icon-devil" viewBox="0 0 80 100">
+        <path d="M30 10 L34 24 Q32 20 28 18 Q24 16 23 12 Z" fill="#ffd166" />
+        <path d="M50 10 L46 24 Q48 20 52 18 Q56 16 57 12 Z" fill="#ffd166" />
+        <circle cx="40" cy="26" r="16" fill="url(#devilSkin)" stroke="#b83236" stroke-width="2" />
+        <ellipse cx="34" cy="26" rx="4" ry="5" fill="#fff" />
+        <ellipse cx="46" cy="26" rx="4" ry="5" fill="#fff" />
+        <circle cx="34" cy="26" r="2" fill="#1f2937" />
+        <circle cx="46" cy="26" r="2" fill="#1f2937" />
+        <path d="M33 33 Q40 38 47 33" stroke="#1f2937" stroke-width="2" fill="none" stroke-linecap="round" />
+        <rect x="22" y="42" width="36" height="44" rx="10" fill="#b91c1c" stroke="#8a1117" stroke-width="2" />
+        <path d="M22 60 Q40 74 58 60" stroke="#e94f4f" stroke-width="3" fill="none" stroke-linecap="round" />
+        <path d="M40 82 Q28 90 24 98 H56 Q52 90 40 82 Z" fill="#590e0e" />
+        <path d="M30 52 Q40 44 50 52" stroke="#ffd166" stroke-width="3" fill="none" stroke-linecap="round" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <script>
+    const boatCapacity = 2;
+    const statusMessage = document.getElementById("statusMessage");
+    const boatSideLabel = document.getElementById("boatSideLabel");
+    const leftFigures = document.getElementById("leftFigures");
+    const rightFigures = document.getElementById("rightFigures");
+    const boatFigures = document.getElementById("boatFigures");
+    const leftCount = document.getElementById("leftCount");
+    const rightCount = document.getElementById("rightCount");
+    const boatEl = document.getElementById("boat");
+    const sailBtn = document.getElementById("sailBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const state = {
+      left: { monks: 3, devils: 3 },
+      right: { monks: 0, devils: 0 },
+      boat: { monks: 0, devils: 0 },
+      boatSide: "left",
+      gameOver: false,
+      result: null,
+    };
+
+    function setMessage(text, type = "neutral") {
+      statusMessage.textContent = text;
+      statusMessage.className = "message";
+      if (type === "win") statusMessage.classList.add("win");
+      if (type === "lose") statusMessage.classList.add("lose");
+    }
+
+    function isSafe(group) {
+      return !(group.monks > 0 && group.devils > group.monks);
+    }
+
+    function checkLoss() {
+      const leftUnsafe = !isSafe(state.left);
+      const rightUnsafe = !isSafe(state.right);
+      const lost = leftUnsafe || rightUnsafe;
+      document.querySelector('[data-side="left"]').classList.toggle("unsafe", leftUnsafe);
+      document.querySelector('[data-side="right"]').classList.toggle("unsafe", rightUnsafe);
+      if (lost) {
+        state.gameOver = true;
+        state.result = "lose";
+        setMessage("Devils overpowered the monks. Reset to try again.", "lose");
+      }
+      return lost;
+    }
+
+    function checkWin() {
+      const everyoneRight =
+        state.right.monks === 3 &&
+        state.right.devils === 3 &&
+        state.boat.monks === 0 &&
+        state.boat.devils === 0 &&
+        state.boatSide === "right";
+      if (everyoneRight) {
+        state.gameOver = true;
+        state.result = "win";
+        setMessage("Success! Every monk and every devil reached the right bank safely.", "win");
+      }
+    }
+
+    function createToken(type, location) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `token ${type}`;
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 80 100");
+      const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+      use.setAttributeNS("http://www.w3.org/1999/xlink", "href", `#icon-${type}`);
+      svg.appendChild(use);
+      btn.appendChild(svg);
+
+      const sideName = location === "boat" ? "boat" : `${location} bank`;
+      btn.setAttribute("aria-label", `${type} on ${sideName}`);
+
+      const isDocked = location === state.boatSide;
+      if (location !== "boat" && !isDocked) {
+        btn.classList.add("disabled");
+        btn.disabled = true;
+      }
+      if (state.gameOver) btn.disabled = true;
+
+      btn.addEventListener("click", () => {
+        if (state.gameOver) return;
+        if (location === "boat") {
+          unloadFromBoat(type);
+        } else {
+          loadToBoat(location, type);
+        }
+      });
+      return btn;
+    }
+
+    function render() {
+      leftFigures.innerHTML = "";
+      rightFigures.innerHTML = "";
+      boatFigures.innerHTML = "";
+
+      for (let i = 0; i < state.left.monks; i++) {
+        leftFigures.appendChild(createToken("monk", "left"));
+      }
+      for (let i = 0; i < state.left.devils; i++) {
+        leftFigures.appendChild(createToken("devil", "left"));
+      }
+      for (let i = 0; i < state.right.monks; i++) {
+        rightFigures.appendChild(createToken("monk", "right"));
+      }
+      for (let i = 0; i < state.right.devils; i++) {
+        rightFigures.appendChild(createToken("devil", "right"));
+      }
+      for (let i = 0; i < state.boat.monks; i++) {
+        boatFigures.appendChild(createToken("monk", "boat"));
+      }
+      for (let i = 0; i < state.boat.devils; i++) {
+        boatFigures.appendChild(createToken("devil", "boat"));
+      }
+
+      leftCount.textContent = `${state.left.monks} monk${state.left.monks === 1 ? "" : "s"}, ${state.left.devils} devil${state.left.devils === 1 ? "" : "s"}`;
+      rightCount.textContent = `${state.right.monks} monk${state.right.monks === 1 ? "" : "s"}, ${state.right.devils} devil${state.right.devils === 1 ? "" : "s"}`;
+      boatSideLabel.textContent = `${state.boatSide.charAt(0).toUpperCase()}${state.boatSide.slice(1)} bank`;
+
+      boatEl.setAttribute("data-side", state.boatSide);
+
+      sailBtn.textContent = state.boatSide === "left" ? "Sail to right bank" : "Sail to left bank";
+      sailBtn.disabled = state.gameOver;
+      resetBtn.disabled = false;
+    }
+
+    function loadToBoat(side, type) {
+      if (state.boatSide !== side) {
+        setMessage(`Boat is docked on the ${state.boatSide} bank.`);
+        return;
+      }
+      if (state.boat.monks + state.boat.devils >= boatCapacity) {
+        setMessage("Boat is full. Sail or unload first.");
+        return;
+      }
+      if (state[side][type] <= 0) {
+        setMessage(`No ${type}s left on this bank.`);
+        return;
+      }
+      const nextBoat = { ...state.boat, [type]: state.boat[type] + 1 };
+      if (!isSafe(nextBoat)) {
+        setMessage("Devils would overpower monks on the boat.", "lose");
+        return;
+      }
+      state[side][type] -= 1;
+      state.boat = nextBoat;
+      setMessage(`Loaded a ${type} onto the boat.`);
+      if (!checkLoss()) {
+        checkWin();
+      }
+      render();
+    }
+
+    function unloadFromBoat(type) {
+      if (state.boat[type] <= 0) {
+        setMessage(`No ${type}s on the boat.`);
+        return;
+      }
+      state.boat[type] -= 1;
+      state[state.boatSide][type] += 1;
+      setMessage(`Moved a ${type} onto the ${state.boatSide} bank.`);
+      if (!checkLoss()) {
+        checkWin();
+      }
+      render();
+    }
+
+    function sailBoat() {
+      if (state.gameOver) return;
+      const passengers = state.boat.monks + state.boat.devils;
+      if (passengers === 0) {
+        setMessage("Load at least one passenger before sailing.");
+        return;
+      }
+      state.boatSide = state.boatSide === "left" ? "right" : "left";
+      setMessage(`Boat arrived on the ${state.boatSide} bank.`);
+      if (!checkLoss()) {
+        checkWin();
+      }
+      render();
+    }
+
+    function resetGame() {
+      state.left = { monks: 3, devils: 3 };
+      state.right = { monks: 0, devils: 0 };
+      state.boat = { monks: 0, devils: 0 };
+      state.boatSide = "left";
+      state.gameOver = false;
+      state.result = null;
+      document.querySelector('[data-side="left"]').classList.remove("unsafe");
+      document.querySelector('[data-side="right"]').classList.remove("unsafe");
+      setMessage("Load passengers from the docked bank, then sail across.");
+      render();
+    }
+
+    sailBtn.addEventListener("click", sailBoat);
+    resetBtn.addEventListener("click", resetGame);
+    render();
+  </script>
+</body>
+</html>
