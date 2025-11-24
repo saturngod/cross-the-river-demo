@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monks & Devils - River Crossing Puzzle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Background layers */
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .sky {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(180deg, #1a1a3e 0%, #4a3b6b 30%, #8b5a8c 60%, #d4848c 80%, #f4a460 100%);
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 40%;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .moon {
+            position: absolute;
+            top: 10%;
+            right: 15%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #fffacd, #f0e68c);
+            border-radius: 50%;
+            box-shadow: 0 0 40px #fffacd, 0 0 80px rgba(255, 250, 205, 0.5);
+        }
+
+        .mountains {
+            position: absolute;
+            bottom: 50%;
+            width: 100%;
+            height: 30%;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .mountain-1 {
+            left: -5%;
+            border-width: 0 150px 200px 150px;
+            border-color: transparent transparent #2d1f3d transparent;
+        }
+
+        .mountain-2 {
+            left: 15%;
+            border-width: 0 200px 250px 200px;
+            border-color: transparent transparent #3d2a4d transparent;
+        }
+
+        .mountain-3 {
+            right: 20%;
+            border-width: 0 180px 220px 180px;
+            border-color: transparent transparent #2d1f3d transparent;
+        }
+
+        .mountain-4 {
+            right: -10%;
+            border-width: 0 220px 280px 220px;
+            border-color: transparent transparent #3d2a4d transparent;
+        }
+
+        .river {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(180deg, #1e3a5f 0%, #0d2137 50%, #0a1929 100%);
+            overflow: hidden;
+        }
+
+        .river-reflection {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(255, 255, 255, 0.03) 20px,
+                    rgba(255, 255, 255, 0.03) 40px);
+            animation: ripple 3s ease-in-out infinite;
+        }
+
+        @keyframes ripple {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(10px);
+            }
+        }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 30px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(255,255,255,0.1)' d='M0,60 C300,120 600,0 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E");
+            background-size: 600px 30px;
+            animation: wave 4s linear infinite;
+        }
+
+        .wave-1 {
+            top: 10%;
+            animation-delay: 0s;
+        }
+
+        .wave-2 {
+            top: 30%;
+            animation-delay: -1s;
+            opacity: 0.7;
+        }
+
+        .wave-3 {
+            top: 50%;
+            animation-delay: -2s;
+            opacity: 0.5;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Banks */
+        .bank {
+            position: absolute;
+            bottom: 0;
+            width: 25%;
+            height: 55%;
+            z-index: 10;
+        }
+
+        .left-bank {
+            left: 0;
+            background: linear-gradient(90deg, #2d4a2d 0%, #3d5a3d 70%, transparent 100%);
+            border-radius: 0 50% 0 0;
+        }
+
+        .right-bank {
+            right: 0;
+            background: linear-gradient(-90deg, #2d4a2d 0%, #3d5a3d 70%, transparent 100%);
+            border-radius: 50% 0 0 0;
+        }
+
+        .grass {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20px;
+            background: repeating-linear-gradient(90deg,
+                    #4a7c4a,
+                    #4a7c4a 2px,
+                    #3d6a3d 2px,
+                    #3d6a3d 4px);
+        }
+
+        .trees {
+            position: absolute;
+            bottom: 20%;
+        }
+
+        .tree {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+        }
+
+        /* Characters area */
+        .characters-area {
+            position: absolute;
+            bottom: 15%;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            z-index: 20;
+        }
+
+        .left-characters {
+            left: 3%;
+        }
+
+        .right-characters {
+            right: 3%;
+        }
+
+        /* Character styles */
+        .character {
+            width: 50px;
+            height: 70px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .character:hover {
+            transform: scale(1.1);
+        }
+
+        .character.selected {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 10px gold);
+        }
+
+        .character svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Boat */
+        .boat-area {
+            position: absolute;
+            bottom: 8%;
+            z-index: 15;
+            transition: left 1.5s ease-in-out;
+        }
+
+        .boat-area.left {
+            left: 22%;
+        }
+
+        .boat-area.right {
+            left: 53%;
+        }
+
+        .boat {
+            position: relative;
+            width: 180px;
+            height: 120px;
+            cursor: pointer;
+        }
+
+        .boat:hover {
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .boat-characters {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .boat-characters .character {
+            width: 40px;
+            height: 56px;
+        }
+
+        /* UI Elements */
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 15px 30px;
+            color: white;
+            text-align: center;
+            z-index: 100;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+
+        .ui-panel h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-icon {
+            width: 25px;
+            height: 25px;
+        }
+
+        /* Control buttons */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-sail {
+            background: linear-gradient(180deg, #4a90d9, #2e5a8c);
+            color: white;
+            border: 2px solid #6ab0ff;
+        }
+
+        .btn-sail:hover:not(:disabled) {
+            background: linear-gradient(180deg, #6ab0ff, #4a90d9);
+            transform: translateY(-2px);
+        }
+
+        .btn-sail:disabled {
+            background: #555;
+            border-color: #777;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background: linear-gradient(180deg, #d94a4a, #8c2e2e);
+            color: white;
+            border: 2px solid #ff6a6a;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(180deg, #ff6a6a, #d94a4a);
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(180deg, #2a2a4a, #1a1a3a);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            border: 3px solid;
+            animation: modalPop 0.5s ease;
+        }
+
+        .modal-content.win {
+            border-color: #ffd700;
+        }
+
+        .modal-content.lose {
+            border-color: #ff4444;
+        }
+
+        @keyframes modalPop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-content.win h2 {
+            color: #ffd700;
+        }
+
+        .modal-content.lose h2 {
+            color: #ff4444;
+        }
+
+        .modal-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+
+        /* Instructions */
+        .instructions {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #aaa;
+            font-size: 0.9rem;
+            z-index: 50;
+            text-align: center;
+        }
+
+        /* Bank labels */
+        .bank-label {
+            position: absolute;
+            bottom: 52%;
+            padding: 5px 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 5px;
+            color: #ffd700;
+            font-weight: bold;
+            z-index: 25;
+        }
+
+        .bank-label.left {
+            left: 5%;
+        }
+
+        .bank-label.right {
+            right: 5%;
+        }
+
+        /* Count display on banks */
+        .bank-count {
+            position: absolute;
+            bottom: 48%;
+            padding: 5px 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            color: white;
+            font-size: 0.8rem;
+            z-index: 25;
+        }
+
+        .bank-count.left {
+            left: 5%;
+        }
+
+        .bank-count.right {
+            right: 5%;
+        }
+
+        .danger {
+            color: #ff4444 !important;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- Background -->
+        <div class="background">
+            <div class="sky">
+                <div class="stars" id="stars"></div>
+                <div class="moon"></div>
+            </div>
+            <div class="mountains">
+                <div class="mountain mountain-1"></div>
+                <div class="mountain mountain-2"></div>
+                <div class="mountain mountain-3"></div>
+                <div class="mountain mountain-4"></div>
+            </div>
+            <div class="river">
+                <div class="river-reflection"></div>
+                <div class="wave wave-1"></div>
+                <div class="wave wave-2"></div>
+                <div class="wave wave-3"></div>
+            </div>
+        </div>
+
+        <!-- Banks -->
+        <div class="bank left-bank">
+            <div class="grass"></div>
+        </div>
+        <div class="bank right-bank">
+            <div class="grass"></div>
+        </div>
+
+        <!-- Bank Labels -->
+        <div class="bank-label left">LEFT BANK</div>
+        <div class="bank-label right">RIGHT BANK</div>
+
+        <!-- Bank Counts -->
+        <div class="bank-count left" id="leftCount">👨‍🦲 3 | 😈 3</div>
+        <div class="bank-count right" id="rightCount">👨‍🦲 0 | 😈 0</div>
+
+        <!-- Characters on left bank -->
+        <div class="characters-area left-characters" id="leftBank"></div>
+
+        <!-- Characters on right bank -->
+        <div class="characters-area right-characters" id="rightBank"></div>
+
+        <!-- Boat -->
+        <div class="boat-area left" id="boatArea">
+            <div class="boat" onclick="sailBoat()">
+                <svg viewBox="0 0 180 120">
+                    <!-- Boat hull -->
+                    <path d="M20,80 Q30,100 90,105 Q150,100 160,80 L150,60 Q90,70 30,60 Z" fill="#8B4513"
+                        stroke="#5D3A1A" stroke-width="2" />
+                    <!-- Boat deck -->
+                    <path d="M30,60 Q90,70 150,60 Q145,50 90,55 Q35,50 30,60" fill="#A0522D" stroke="#5D3A1A"
+                        stroke-width="1" />
+                    <!-- Boat details -->
+                    <line x1="50" y1="65" x2="50" y2="85" stroke="#5D3A1A" stroke-width="2" />
+                    <line x1="90" y1="68" x2="90" y2="90" stroke="#5D3A1A" stroke-width="2" />
+                    <line x1="130" y1="65" x2="130" y2="85" stroke="#5D3A1A" stroke-width="2" />
+                    <!-- Oars -->
+                    <ellipse cx="15" cy="75" rx="15" ry="5" fill="#DEB887" stroke="#8B4513" stroke-width="1" />
+                    <ellipse cx="165" cy="75" rx="15" ry="5" fill="#DEB887" stroke="#8B4513" stroke-width="1" />
+                </svg>
+                <div class="boat-characters" id="boatCharacters"></div>
+            </div>
+        </div>
+
+        <!-- UI Panel -->
+        <div class="ui-panel">
+            <h1>🏔️ Monks & Devils 🏔️</h1>
+            <div class="stats">
+                <div class="stat">
+                    <span>Moves:</span>
+                    <span id="moves">0</span>
+                </div>
+                <div class="stat">
+                    <span>Boat:</span>
+                    <span id="boatSide">Left</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            Click characters to board/unboard the boat (max 2) • Click boat or "SAIL" to cross •
+            Devils must never outnumber monks!
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-sail" id="sailBtn" onclick="sailBoat()">⛵ Sail</button>
+            <button class="btn btn-reset" onclick="resetGame()">🔄 Reset</button>
+        </div>
+
+        <!-- Win Modal -->
+        <div class="modal" id="winModal">
+            <div class="modal-content win">
+                <h2>🎉 Victory! 🎉</h2>
+                <p>All monks and devils crossed safely!</p>
+                <p id="winMoves">Completed in 0 moves</p>
+                <button class="btn btn-sail" onclick="resetGame()">Play Again</button>
+            </div>
+        </div>
+
+        <!-- Lose Modal -->
+        <div class="modal" id="loseModal">
+            <div class="modal-content lose">
+                <h2>💀 Game Over 💀</h2>
+                <p>The devils overpowered the monks!</p>
+                <button class="btn btn-reset" onclick="resetGame()">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            leftBank: { monks: 3, devils: 3 },
+            rightBank: { monks: 0, devils: 0 },
+            boat: { monks: 0, devils: 0, position: 'left' },
+            boatCharacters: [], // Array to track who's on boat
+            moves: 0,
+            gameOver: false
+        };
+
+        // Character SVG templates
+        function createMonkSVG() {
+            return `
+                <svg viewBox="0 0 50 70">
+                    <!-- Robe -->
+                    <path d="M10,70 L15,35 Q25,30 35,35 L40,70 Z" fill="#FF8C00" stroke="#CC7000" stroke-width="1"/>
+                    <!-- Inner robe -->
+                    <path d="M20,40 L22,70 L28,70 L30,40 Q25,38 20,40" fill="#FFA500"/>
+                    <!-- Head -->
+                    <circle cx="25" cy="22" r="12" fill="#FFE4C4" stroke="#DEB887" stroke-width="1"/>
+                    <!-- Bald head shine -->
+                    <ellipse cx="22" cy="16" rx="4" ry="2" fill="rgba(255,255,255,0.3)"/>
+                    <!-- Eyes -->
+                    <circle cx="21" cy="22" r="2" fill="#333"/>
+                    <circle cx="29" cy="22" r="2" fill="#333"/>
+                    <!-- Peaceful smile -->
+                    <path d="M22,28 Q25,31 28,28" stroke="#333" stroke-width="1.5" fill="none"/>
+                    <!-- Prayer beads -->
+                    <circle cx="18" cy="38" r="2" fill="#8B4513"/>
+                    <circle cx="16" cy="42" r="2" fill="#8B4513"/>
+                    <circle cx="15" cy="46" r="2" fill="#8B4513"/>
+                    <!-- Hands together -->
+                    <ellipse cx="25" cy="45" rx="5" ry="4" fill="#FFE4C4"/>
+                </svg>
+            `;
+        }
+
+        function createDevilSVG() {
+            return `
+                <svg viewBox="0 0 50 70">
+                    <!-- Body -->
+                    <path d="M12,70 L15,38 Q25,33 35,38 L38,70 Z" fill="#4A0080" stroke="#380060" stroke-width="1"/>
+                    <!-- Wings (folded) -->
+                    <path d="M10,45 Q5,35 8,30 Q12,35 15,40 Z" fill="#380060"/>
+                    <path d="M40,45 Q45,35 42,30 Q38,35 35,40 Z" fill="#380060"/>
+                    <!-- Head -->
+                    <circle cx="25" cy="22" r="12" fill="#DC143C" stroke="#B01030" stroke-width="1"/>
+                    <!-- Horns -->
+                    <path d="M14,15 Q10,5 14,8 Q16,12 18,15" fill="#FFD700" stroke="#DAA520" stroke-width="0.5"/>
+                    <path d="M36,15 Q40,5 36,8 Q34,12 32,15" fill="#FFD700" stroke="#DAA520" stroke-width="0.5"/>
+                    <!-- Evil eyes -->
+                    <ellipse cx="20" cy="20" rx="3" ry="2" fill="#FFFF00"/>
+                    <circle cx="20" cy="20" r="1.5" fill="#000"/>
+                    <ellipse cx="30" cy="20" rx="3" ry="2" fill="#FFFF00"/>
+                    <circle cx="30" cy="20" r="1.5" fill="#000"/>
+                    <!-- Evil grin -->
+                    <path d="M19,28 Q25,33 31,28" stroke="#000" stroke-width="2" fill="none"/>
+                    <!-- Fangs -->
+                    <path d="M21,28 L22,31 L23,28" fill="white"/>
+                    <path d="M27,28 L28,31 L29,28" fill="white"/>
+                    <!-- Tail -->
+                    <path d="M25,70 Q35,65 40,55 Q42,50 38,52" stroke="#DC143C" stroke-width="3" fill="none"/>
+                    <path d="M38,52 L42,48 L36,50 Z" fill="#DC143C"/>
+                    <!-- Claws/hands -->
+                    <ellipse cx="20" cy="50" rx="4" ry="3" fill="#DC143C"/>
+                    <ellipse cx="30" cy="50" rx="4" ry="3" fill="#DC143C"/>
+                </svg>
+            `;
+        }
+
+        // Initialize stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = (Math.random() * 3 + 1) + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Render characters on a bank
+        function renderBank(bankId, monks, devils, bankSide) {
+            const container = document.getElementById(bankId);
+            container.innerHTML = '';
+
+            // Render monks
+            for (let i = 0; i < monks; i++) {
+                const char = document.createElement('div');
+                char.className = 'character monk';
+                char.innerHTML = createMonkSVG();
+                char.onclick = () => toggleCharacter('monk', bankSide);
+                container.appendChild(char);
+            }
+
+            // Render devils
+            for (let i = 0; i < devils; i++) {
+                const char = document.createElement('div');
+                char.className = 'character devil';
+                char.innerHTML = createDevilSVG();
+                char.onclick = () => toggleCharacter('devil', bankSide);
+                container.appendChild(char);
+            }
+        }
+
+        // Render boat characters
+        function renderBoat() {
+            const container = document.getElementById('boatCharacters');
+            container.innerHTML = '';
+
+            for (const char of gameState.boatCharacters) {
+                const charDiv = document.createElement('div');
+                charDiv.className = `character ${char}`;
+                charDiv.innerHTML = char === 'monk' ? createMonkSVG() : createDevilSVG();
+                charDiv.onclick = () => removeFromBoat(char);
+                container.appendChild(charDiv);
+            }
+        }
+
+        // Toggle character between bank and boat
+        function toggleCharacter(type, bankSide) {
+            if (gameState.gameOver) return;
+            if (gameState.boat.position !== bankSide) return; // Boat not at this bank
+
+            const totalOnBoat = gameState.boat.monks + gameState.boat.devils;
+            if (totalOnBoat >= 2) return; // Boat full
+
+            const bank = bankSide === 'left' ? gameState.leftBank : gameState.rightBank;
+
+            if (type === 'monk' && bank.monks > 0) {
+                bank.monks--;
+                gameState.boat.monks++;
+                gameState.boatCharacters.push('monk');
+            } else if (type === 'devil' && bank.devils > 0) {
+                bank.devils--;
+                gameState.boat.devils++;
+                gameState.boatCharacters.push('devil');
+            }
+
+            updateDisplay();
+        }
+
+        // Remove character from boat
+        function removeFromBoat(type) {
+            if (gameState.gameOver) return;
+
+            const bank = gameState.boat.position === 'left' ? gameState.leftBank : gameState.rightBank;
+            const index = gameState.boatCharacters.indexOf(type);
+
+            if (index > -1) {
+                gameState.boatCharacters.splice(index, 1);
+                if (type === 'monk') {
+                    gameState.boat.monks--;
+                    bank.monks++;
+                } else {
+                    gameState.boat.devils--;
+                    bank.devils++;
+                }
+            }
+
+            updateDisplay();
+        }
+
+        // Sail the boat
+        function sailBoat() {
+            if (gameState.gameOver) return;
+
+            const totalOnBoat = gameState.boat.monks + gameState.boat.devils;
+            if (totalOnBoat === 0) return; // Need at least 1 to sail
+
+            // Move boat
+            const boatArea = document.getElementById('boatArea');
+
+            if (gameState.boat.position === 'left') {
+                gameState.boat.position = 'right';
+                boatArea.classList.remove('left');
+                boatArea.classList.add('right');
+            } else {
+                gameState.boat.position = 'left';
+                boatArea.classList.remove('right');
+                boatArea.classList.add('left');
+            }
+
+            gameState.moves++;
+
+            // After animation, unload and check
+            setTimeout(() => {
+                unloadBoat();
+                updateDisplay();
+                checkGameState();
+            }, 1500);
+        }
+
+        // Unload boat to current bank
+        function unloadBoat() {
+            const bank = gameState.boat.position === 'left' ? gameState.leftBank : gameState.rightBank;
+
+            bank.monks += gameState.boat.monks;
+            bank.devils += gameState.boat.devils;
+            gameState.boat.monks = 0;
+            gameState.boat.devils = 0;
+            gameState.boatCharacters = [];
+        }
+
+        // Check win/lose conditions
+        function checkGameState() {
+            // Check lose condition
+            if (isInvalidState(gameState.leftBank) || isInvalidState(gameState.rightBank)) {
+                gameState.gameOver = true;
+                document.getElementById('loseModal').classList.add('show');
+                return;
+            }
+
+            // Check win condition
+            if (gameState.rightBank.monks === 3 && gameState.rightBank.devils === 3) {
+                gameState.gameOver = true;
+                document.getElementById('winMoves').textContent = `Completed in ${gameState.moves} moves`;
+                document.getElementById('winModal').classList.add('show');
+            }
+        }
+
+        // Check if bank state is invalid (devils > monks when monks > 0)
+        function isInvalidState(bank) {
+            return bank.monks > 0 && bank.devils > bank.monks;
+        }
+
+        // Update all display elements
+        function updateDisplay() {
+            // Render banks
+            renderBank('leftBank', gameState.leftBank.monks, gameState.leftBank.devils, 'left');
+            renderBank('rightBank', gameState.rightBank.monks, gameState.rightBank.devils, 'right');
+            renderBoat();
+
+            // Update counts
+            const leftCount = document.getElementById('leftCount');
+            const rightCount = document.getElementById('rightCount');
+
+            leftCount.textContent = `👨‍🦲 ${gameState.leftBank.monks} | 😈 ${gameState.leftBank.devils}`;
+            rightCount.textContent = `👨‍🦲 ${gameState.rightBank.monks} | 😈 ${gameState.rightBank.devils}`;
+
+            // Highlight danger
+            leftCount.classList.toggle('danger', isInvalidState(gameState.leftBank));
+            rightCount.classList.toggle('danger', isInvalidState(gameState.rightBank));
+
+            // Update UI
+            document.getElementById('moves').textContent = gameState.moves;
+            document.getElementById('boatSide').textContent = gameState.boat.position === 'left' ? 'Left' : 'Right';
+
+            // Update sail button
+            const sailBtn = document.getElementById('sailBtn');
+            const totalOnBoat = gameState.boat.monks + gameState.boat.devils;
+            sailBtn.disabled = totalOnBoat === 0 || gameState.gameOver;
+        }
+
+        // Reset game
+        function resetGame() {
+            gameState = {
+                leftBank: { monks: 3, devils: 3 },
+                rightBank: { monks: 0, devils: 0 },
+                boat: { monks: 0, devils: 0, position: 'left' },
+                boatCharacters: [],
+                moves: 0,
+                gameOver: false
+            };
+
+            // Reset boat position
+            const boatArea = document.getElementById('boatArea');
+            boatArea.classList.remove('right');
+            boatArea.classList.add('left');
+
+            // Hide modals
+            document.getElementById('winModal').classList.remove('show');
+            document.getElementById('loseModal').classList.remove('show');
+
+            updateDisplay();
+        }
+
+        // Initialize game
+        function init() {
+            createStars();
+            updateDisplay();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

@@ -49,6 +49,10 @@ More formally:
 
 ![](./images/gemini.png)
 
+## Opus 4.5
+
+![](./images/opus-45.png)
+
 ## GPT 5.1-codex-max (xhigh)
 
 ![](./images/gpt.png)
